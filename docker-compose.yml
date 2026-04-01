@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ide
+      POSTGRES_PASSWORD: ide
+      POSTGRES_DB: ide
+    ports:
+      - "5433:5432"
+    volumes:
+      - ide_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ide"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  ide_pgdata:

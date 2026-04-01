@@ -1,0 +1,21 @@
+{
+  "name": "d1-online-ide",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser IDE with Docker-sandboxed execution, PTY terminal over WebSocket, and Yjs collaborative editing",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "setup": "npm install && docker compose up -d db && npm run pull-images",
+    "pull-images": "docker pull python:3.12-alpine && docker pull node:20-alpine",
+    "seed": "npm --workspace server run seed",
+    "dev": "npm --workspace server run dev",
+    "dev:web": "npm --workspace web run dev",
+    "build": "npm --workspace server run build && npm --workspace web run build",
+    "test": "npm --workspace server run test",
+    "typecheck": "npm --workspace server run typecheck && npm --workspace web run typecheck",
+    "verify": "npm --workspace server run verify"
+  }
+}
