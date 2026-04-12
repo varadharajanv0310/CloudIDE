@@ -5,7 +5,8 @@ import {
   LANGUAGE_IMAGES,
   runCommandFor,
 } from "./hardening.js";
-import { buildTar, type TarEntry } from "./tar.js";
+import type { TarEntry } from "./tar.js";
+import { writeFilesViaExec } from "./writeFiles.js";
 import { config } from "../config.js";
 
 export const docker = new Dockerode(); // auto-detects npipe on Windows, socket elsewhere
@@ -60,7 +61,7 @@ export async function runProject(
   const done = (async (): Promise<RunResult> => {
     try {
       await container.start();
-      await container.putArchive(await buildTar(files), { path: "/workspace" });
+      await writeFilesViaExec(container, files);
 
       const exec = await container.exec({
         Cmd: opts.command ?? runCommandFor(language, entryFile),

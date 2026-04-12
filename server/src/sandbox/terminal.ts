@@ -1,7 +1,8 @@
 import type { Duplex } from "node:stream";
 import { docker } from "./runner.js";
 import { hardenedContainerConfig, LANGUAGE_IMAGES } from "./hardening.js";
-import { buildTar, type TarEntry } from "./tar.js";
+import type { TarEntry } from "./tar.js";
+import { writeFilesViaExec } from "./writeFiles.js";
 
 export interface TerminalSession {
   write: (data: string) => void;
@@ -23,9 +24,7 @@ export async function createTerminalSession(
   const image = LANGUAGE_IMAGES[language] ?? LANGUAGE_IMAGES.python;
   const container = await docker.createContainer(hardenedContainerConfig(image));
   await container.start();
-  if (files.length > 0) {
-    await container.putArchive(await buildTar(files), { path: "/workspace" });
-  }
+  await writeFilesViaExec(container, files);
 
   const exec = await container.exec({
     Cmd: ["/bin/sh"],
