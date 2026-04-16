@@ -40,7 +40,9 @@ async function liveRun(projectId: number): Promise<{ out: string; status: string
 
 async function main() {
   // 1. server + projects reachable
-  const health = await fetch(`${BASE}/api/health`).then((r) => r.json()).catch(() => null);
+  const health = (await fetch(`${BASE}/api/health`)
+    .then((r) => r.json())
+    .catch(() => null)) as { ok?: boolean } | null;
   check("server reachable", health?.ok === true);
 
   const projects = (await fetch(`${BASE}/api/projects`).then((r) => r.json())) as Array<{
