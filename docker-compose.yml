@@ -15,5 +15,35 @@ services:
       timeout: 3s
       retries: 20
 
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      DATABASE_URL: postgres://ide:ide@db:5432/ide
+      PORT: 4001
+    ports:
+      - "4001:4001"
+    depends_on:
+      db:
+        condition: service_healthy
+    # Docker-out-of-Docker: the server spawns sibling hardened sandbox
+    # containers on the host engine via the mounted socket. Sandboxes are
+    # still network-isolated, capdropped, mem/cpu/pids-capped, readonly-rootfs.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: sh -c "npx -w server tsx src/seed.ts && npx -w server tsx src/index.ts"
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    environment:
+      VITE_API_PROXY: http://server:4001
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+
 volumes:
   ide_pgdata:
