@@ -1,4 +1,4 @@
-# D1 — Online IDE / Replit Clone
+# D1 — CloudIDE / Replit Clone
 
 A browser-based IDE with **Docker-sandboxed execution** of untrusted code, a real
 interactive terminal (PTY) over WebSocket, and **collaborative editing** via Yjs
@@ -117,3 +117,34 @@ split, converge to byte-identical state with every edit preserved.
 
 Data model: `users`, `projects`, `files (path, content)`, `runs (exit_code,
 duration_ms, status)`.
+
+## Project structure
+
+```
+CloudIDE/
+├── server/
+│   ├── src/
+│   │   ├── sandbox/       # hardened Docker execution: runner, terminal (PTY), hardening profile, tmpfs file staging
+│   │   ├── ws/            # WebSocket endpoints — run (streamed output), terminal, Yjs collab
+│   │   ├── services/      # file service + strict path sanitization (no workspace escape)
+│   │   ├── routes/        # REST API (projects, files, runs)
+│   │   └── migrations/    # Postgres schema
+│   ├── scripts/           # verify (live e2e gate) + smoke-run
+│   └── test/              # sandbox isolation/limits, terminal, CRDT convergence, path-safety
+├── web/                   # React + Monaco editor + xterm.js terminal
+└── docker-compose.yml     # db + server + web (server mounts docker.sock — docker-out-of-docker)
+```
+
+## Screenshots
+
+> _Placeholder — add a GIF of the editor running code in the sandbox with live output, and a screenshot of the collaborative cursors._
+>
+> `docs/demo.gif` · `docs/collab.png`
+
+## Roadmap / future improvements
+
+- Package install inside the sandbox (`pip`/`npm`) with a short-lived network window
+- More languages (Go, Rust, Java) via additional hardened base images
+- Container pooling to shave cold-start latency on `Run`
+- Persistent per-project sessions and shareable read-only links
+- Server-side syntax/type diagnostics surfaced in Monaco
